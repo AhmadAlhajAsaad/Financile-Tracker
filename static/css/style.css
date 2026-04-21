@@ -1,0 +1,27 @@
+﻿/* FinTrack - Eigen stijlen */
+
+body {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* Tabel horizontaal scrollbaar op mobiel (F46) */
+.table-responsive {
+  overflow-x: auto;
+}
+
+/* Kaarten */
+.card {
+  border-radius: 0.5rem;
+}
+
+/* Navbar actieve pagina */
+.navbar .nav-link.active {
+  font-weight: 600;
+}

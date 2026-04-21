@@ -1,0 +1,30 @@
+﻿{% extends "base.html" %}
+{% block title %}Inloggen — FinTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card shadow-sm">
+      <div class="card-body p-4">
+        <h2 class="card-title mb-4 text-center"><i class="fa-solid fa-lock me-2"></i>Inloggen</h2>
+        <form method="POST" action="{{ url_for('auth.login') }}" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <div class="mb-3">
+            <label for="identifier" class="form-label">Gebruikersnaam of e-mail</label>
+            <input type="text" class="form-control" id="identifier" name="identifier" required autofocus />
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Wachtwoord</label>
+            <input type="password" class="form-control" id="password" name="password" required />
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary">Inloggen</button>
+          </div>
+        </form>
+        <hr />
+        <p class="text-center mb-0">Nog geen account? <a href="{{ url_for('auth.register') }}">Registreer hier</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

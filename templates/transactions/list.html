@@ -1,0 +1,110 @@
+﻿{% extends "base.html" %}
+{% block title %}Transacties — FinTrack{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1>Transacties</h1>
+  <div>
+    <a href="{{ url_for('transactions.export_csv') }}" class="btn btn-outline-secondary btn-sm me-2">
+      <i class="fa-solid fa-file-csv me-1"></i>Exporteer CSV
+    </a>
+    <a href="{{ url_for('transactions.add') }}" class="btn btn-primary btn-sm">
+      <i class="fa-solid fa-plus me-1"></i>Toevoegen
+    </a>
+  </div>
+</div>
+
+<!-- Filterformulier (F29–F34) -->
+<form method="GET" class="card card-body mb-3">
+  <div class="row g-2">
+    <div class="col-md-2">
+      <label class="form-label form-label-sm">Van</label>
+      <input type="date" name="date_from" class="form-control form-control-sm" value="{{ filters.get('date_from','') }}" />
+    </div>
+    <div class="col-md-2">
+      <label class="form-label form-label-sm">Tot</label>
+      <input type="date" name="date_to" class="form-control form-control-sm" value="{{ filters.get('date_to','') }}" />
+    </div>
+    <div class="col-md-3">
+      <label class="form-label form-label-sm">Categorie</label>
+      <select name="category_id" class="form-select form-select-sm">
+        <option value="">Alle categorieën</option>
+        {% for cat in categories %}
+          <option value="{{ cat.id }}" {{ 'selected' if filters.get('category_id') == cat.id|string }}>{{ cat.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label form-label-sm">Type</label>
+      <select name="type" class="form-select form-select-sm">
+        <option value="">Alle types</option>
+        <option value="inkomst" {{ 'selected' if filters.get('type') == 'inkomst' }}>Inkomsten</option>
+        <option value="uitgave" {{ 'selected' if filters.get('type') == 'uitgave' }}>Uitgaven</option>
+      </select>
+    </div>
+    <div class="col-md-2">
+      <label class="form-label form-label-sm">Zoeken</label>
+      <input type="text" name="q" class="form-control form-control-sm" placeholder="Trefwoord..." value="{{ filters.get('q','') }}" />
+    </div>
+    <div class="col-md-1 d-flex align-items-end">
+      <button type="submit" class="btn btn-primary btn-sm w-100">Filter</button>
+    </div>
+  </div>
+  {% if filters %}
+  <div class="mt-2">
+    <a href="{{ url_for('transactions.list_transactions') }}" class="btn btn-sm btn-outline-danger">
+      <i class="fa-solid fa-xmark me-1"></i>Filters wissen
+    </a>
+  </div>
+  {% endif %}
+</form>
+
+<!-- Sortering (F35) -->
+<div class="mb-2 text-end">
+  <small class="text-muted me-2">Sorteren:</small>
+  <a href="{{ url_for('transactions.list_transactions', **dict(filters, sort='date_desc')) }}" class="btn btn-sm btn-outline-secondary">Datum ↓</a>
+  <a href="{{ url_for('transactions.list_transactions', **dict(filters, sort='date_asc')) }}" class="btn btn-sm btn-outline-secondary">Datum ↑</a>
+  <a href="{{ url_for('transactions.list_transactions', **dict(filters, sort='amount_desc')) }}" class="btn btn-sm btn-outline-secondary">Bedrag ↓</a>
+  <a href="{{ url_for('transactions.list_transactions', **dict(filters, sort='amount_asc')) }}" class="btn btn-sm btn-outline-secondary">Bedrag ↑</a>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover align-middle">
+    <thead class="table-light">
+      <tr>
+        <th>Datum</th>
+        <th>Beschrijving</th>
+        <th>Categorie</th>
+        <th class="text-end">Bedrag</th>
+        <th class="text-end">Acties</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for tx in transactions %}
+      <tr>
+        <td>{{ tx.date.strftime("%d-%m-%Y") }}</td>
+        <td>{{ tx.description or "—" }}</td>
+        <td><span class="badge {{ 'bg-success' if tx.category.type == 'inkomst' else 'bg-danger' }}">{{ tx.category.name }}</span></td>
+        <td class="text-end {{ 'text-success' if tx.category.type == 'inkomst' else 'text-danger' }} fw-semibold">
+          {{ "+" if tx.category.type == "inkomst" else "−" }}
+          {{ "€ {:,.2f}".format(tx.amount).replace(",","X").replace(".",",").replace("X",".") }}
+        </td>
+        <td class="text-end">
+          <a href="{{ url_for('transactions.edit', tx_id=tx.id) }}" class="btn btn-sm btn-outline-secondary">
+            <i class="fa-solid fa-pen"></i>
+          </a>
+          <form method="POST" action="{{ url_for('transactions.delete', tx_id=tx.id) }}" class="d-inline confirm-delete">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="btn btn-sm btn-outline-danger">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" class="text-center text-muted py-4">Geen transacties gevonden.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

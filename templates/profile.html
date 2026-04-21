@@ -1,0 +1,54 @@
+﻿{% extends "base.html" %}
+{% block title %}Profiel — FinTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+
+    <!-- Profielinfo (F6) -->
+    <div class="card mb-4">
+      <div class="card-header"><h5 class="mb-0"><i class="fa-solid fa-user me-2"></i>Profiel</h5></div>
+      <div class="card-body">
+        <p><strong>Gebruikersnaam:</strong> {{ current_user.username }}</p>
+        <p class="mb-0"><strong>E-mailadres:</strong> {{ current_user.email }}</p>
+      </div>
+    </div>
+
+    <!-- Wachtwoord wijzigen (F7) -->
+    <div class="card mb-4">
+      <div class="card-header"><h5 class="mb-0"><i class="fa-solid fa-key me-2"></i>Wachtwoord wijzigen</h5></div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('profile.change_password') }}" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <div class="mb-3">
+            <label class="form-label">Huidig wachtwoord</label>
+            <input type="password" name="old_password" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nieuw wachtwoord</label>
+            <input type="password" name="new_password" class="form-control" required />
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Bevestig nieuw wachtwoord</label>
+            <input type="password" name="confirm_password" class="form-control" required />
+          </div>
+          <button type="submit" class="btn btn-primary">Wachtwoord wijzigen</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Account verwijderen (F8) -->
+    <div class="card border-danger">
+      <div class="card-header text-danger"><h5 class="mb-0"><i class="fa-solid fa-triangle-exclamation me-2"></i>Gevaarlijke zone</h5></div>
+      <div class="card-body">
+        <p class="text-muted small">Dit verwijdert ook alle transacties en categorieën definitief.</p>
+        <form method="POST" action="{{ url_for('profile.delete_account') }}" class="confirm-delete">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn btn-danger">Account verwijderen</button>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

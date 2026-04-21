@@ -1,0 +1,127 @@
+﻿{% extends "base.html" %}
+{% block title %}Dashboard — FinTrack{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<!-- Saldo kaarten (F22, F23) -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card text-white bg-primary h-100">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 opacity-75">Totaalsaldo</h6>
+        <h2 class="card-title mb-0">{{ "€ {:,.2f}".format(balance).replace(",", "X").replace(".", ",").replace("X", ".") }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-white bg-success h-100">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 opacity-75">Inkomsten deze maand</h6>
+        <h2 class="card-title mb-0">{{ "€ {:,.2f}".format(month_income).replace(",", "X").replace(".", ",").replace("X", ".") }}</h2>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-white bg-danger h-100">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 opacity-75">Uitgaven deze maand</h6>
+        <h2 class="card-title mb-0">{{ "€ {:,.2f}".format(month_expense).replace(",", "X").replace(".", ",").replace("X", ".") }}</h2>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Grafieken (F25, F26, F27) -->
+<div class="row g-3 mb-4">
+  <div class="col-md-5">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Uitgaven per categorie (huidige maand)</h5>
+        <canvas id="pieChart"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Inkomsten vs Uitgaven (laatste 6 maanden)</h5>
+        <canvas id="barChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Laatste transacties (F24) -->
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Laatste transacties</h5>
+    <a href="{{ url_for('transactions.add') }}" class="btn btn-sm btn-primary">
+      <i class="fa-solid fa-plus me-1"></i>Toevoegen
+    </a>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Datum</th>
+          <th>Beschrijving</th>
+          <th>Categorie</th>
+          <th class="text-end">Bedrag</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tx in recent_transactions %}
+        <tr>
+          <td>{{ tx.date.strftime("%d-%m-%Y") }}</td>
+          <td>{{ tx.description or "—" }}</td>
+          <td><span class="badge {{ 'bg-success' if tx.category.type == 'inkomst' else 'bg-danger' }}">{{ tx.category.name }}</span></td>
+          <td class="text-end {{ 'text-success' if tx.category.type == 'inkomst' else 'text-danger' }}">
+            {{ "+" if tx.category.type == "inkomst" else "-" }}
+            {{ "€ {:,.2f}".format(tx.amount).replace(",", "X").replace(".", ",").replace("X", ".") }}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="text-center text-muted py-3">Nog geen transacties.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-footer">
+    <a href="{{ url_for('transactions.list_transactions') }}" class="btn btn-sm btn-outline-secondary">Alle transacties bekijken</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+fetch("{{ url_for('dashboard.chart_data') }}")
+  .then(r => r.json())
+  .then(data => {
+    // Taartdiagram (F25)
+    new Chart(document.getElementById("pieChart"), {
+      type: "pie",
+      data: {
+        labels: data.pie.labels,
+        datasets: [{ data: data.pie.values, backgroundColor: [
+          "#e74c3c","#3498db","#2ecc71","#f39c12","#9b59b6","#1abc9c","#e67e22","#34495e"
+        ]}]
+      },
+      options: { plugins: { tooltip: { enabled: true } } }
+    });
+
+    // Staafdiagram (F26)
+    new Chart(document.getElementById("barChart"), {
+      type: "bar",
+      data: {
+        labels: data.bar.months,
+        datasets: [
+          { label: "Inkomsten", data: data.bar.income, backgroundColor: "#2ecc71" },
+          { label: "Uitgaven",  data: data.bar.expense, backgroundColor: "#e74c3c" }
+        ]
+      },
+      options: { responsive: true, plugins: { tooltip: { enabled: true } } }
+    });
+  });
+</script>
+{% endblock %}
