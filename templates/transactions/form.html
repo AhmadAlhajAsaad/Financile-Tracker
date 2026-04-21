@@ -1,0 +1,60 @@
+﻿{% extends "base.html" %}
+{% block title %}{{ "Transactie bewerken" if action == "edit" else "Transactie toevoegen" }} — FinTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        <h4 class="mb-0">{{ "Transactie bewerken" if action == "edit" else "Nieuwe transactie" }}</h4>
+      </div>
+      <div class="card-body">
+        <form method="POST" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+          <div class="mb-3">
+            <label for="amount" class="form-label">Bedrag (€) <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text">€</span>
+              <input type="number" step="0.01" min="0.01" class="form-control" id="amount" name="amount"
+                     value="{{ tx.amount if tx else '' }}" required />
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="date" class="form-label">Datum <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="date" name="date"
+                   value="{{ tx.date.strftime('%Y-%m-%d') if tx else '' }}" required />
+          </div>
+
+          <div class="mb-3">
+            <label for="category_id" class="form-label">Categorie <span class="text-danger">*</span></label>
+            <select class="form-select" id="category_id" name="category_id" required>
+              <option value="">— Kies categorie —</option>
+              {% for cat in categories %}
+                <option value="{{ cat.id }}"
+                  {% if tx and tx.category_id == cat.id %}selected{% endif %}>
+                  {{ cat.name }} ({{ cat.type }})
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label">Beschrijving <small class="text-muted">(optioneel, max 200 tekens)</small></label>
+            <input type="text" class="form-control" id="description" name="description"
+                   maxlength="200" value="{{ tx.description or '' if tx else '' }}" />
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-floppy-disk me-1"></i>Opslaan
+            </button>
+            <a href="{{ url_for('transactions.list_transactions') }}" class="btn btn-outline-secondary">Annuleren</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
