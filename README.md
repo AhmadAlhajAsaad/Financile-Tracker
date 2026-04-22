@@ -49,7 +49,7 @@ source venv/bin/activate
 ### 3. Afhankelijkheden installeren
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ### 4. Omgevingsvariabelen instellen
