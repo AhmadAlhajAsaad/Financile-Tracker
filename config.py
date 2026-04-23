@@ -1,11 +1,13 @@
-﻿import os
+import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-fallback-key")
-    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", "sqlite:///fintrack.db")
+    _db_url = os.environ.get("DATABASE_URL", "sqlite:///fintrack.db")
+    # Render geeft postgres:// maar SQLAlchemy vereist postgresql://
+    SQLALCHEMY_DATABASE_URI = _db_url.replace("postgres://", "postgresql://", 1)
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = True
     PERMANENT_SESSION_LIFETIME = 1800  # 30 minuten inactiviteit (F45)
